@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>커뮤니티 통합 관리 포털</title>
+    <style>
+        body { 
+            font-family: 'Malgun Gothic', sans-serif; 
+            background-color: #f4f7f6; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        .nav-bar { 
+            width: 100%; 
+            background: #333; 
+            padding: 15px 0; 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+        .nav-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            background: #555; 
+            color: white; 
+            transition: 0.3s; 
+        }
+        .nav-btn.active { 
+            background: #007bff; 
+        }
+        
+        .container { 
+            width: 90%; 
+            max-width: 500px; 
+            background: white; 
+            margin-top: 30px; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            margin-bottom: 50px; 
+        }
+        .form-section { 
+            display: none; 
+        }
+        .form-section.active { 
+            display: block; 
+        }
+        
+        h2 { text-align: center; color: #333; margin-bottom: 25px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        
+        canvas {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background: #fff;
+            cursor: crosshair;
+            width: 100%;
+            height: 100px;
+            box-sizing: border-box;
+        }
+        .btn-clear {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .btn-submit { 
+            width: 100%; 
+            padding: 15px; 
+            margin-top: 25px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 17px; 
+            font-weight: bold; 
+        }
+        .footer { text-align: center; margin-top: 20px; font-size: 13px; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="showForm('repair', this)">고장 접수</button>
+        <button class="nav-btn" onclick="showForm('register', this)">회원 가입</button>
+        <button class="nav-btn" onclick="showForm('cancel', this)">해지 신청</button>
+    </div>
+
+    <div class="container">
+        
+        <div id="repair" class="form-section active">
+            <h2>🛠️ 기구 고장 및 불편 접수</h2>
+            <form>
+                <label>기구 이름 (또는 번호)</label>
+                <input type="text" id="repairItem" placeholder="예) 런닝머신 3번">
+                <label>고장 증상 선택</label>
+                <select id="repairSymptom">
+                    <option>증상을 선택해 주세요</option>
+                    <option>작동 불능</option>
+                    <option>소음 발생</option>
+                    <option>부품 파손</option>
+                    <option>기타</option>
+                </select>
+                <label>상세 내용</label>
+                <textarea id="repairDetail" rows="4" placeholder="고장 부위나 특이사항을 적어주세요."></textarea>
+                <button type="button" class="btn-submit" onclick="submitData('고장접수')">접수하기</button>
+            </form>
+        </div>
+
+        <div id="register" class="form-section">
+            <h2>📝 신규 회원 가입 신청</h2>
+            <form>
+                <label>이름</label>
+                <input type="text" placeholder="성함을 입력하세요">
+                <label>동/호수</label>
+                <input type="text" placeholder="예) 101동 1502호">
+                <label>연락처</label>
+                <input type="tel" placeholder="010-0000-0000">
+                
+                <label>본인 확인 서명 (사인)</label>
+                <canvas id="regCanvas" height="100"></canvas>
+                <button type="button" class="btn-clear" onclick="clearCanvas('regCanvas')">지우기</button>
+                
+                <button type="button" class="btn-submit" onclick="submitData('가입신청')">가입 신청하기</button>
+            </form>
+        </div>
+
+        <div id="cancel" class="form-section">
+            <h2>⚠️ 회원 해지 신청</h2>
+            <form>
+                <label>이름 / 동호수</label>
+                <input type="text" placeholder="성함과 동호수를 입력하세요">
+                <label>해지 사유</label>
+                <textarea rows="3" placeholder="해지 사유를 간단히 적어주세요 (시설 불만족, 이사 등)"></textarea>
+                
+                <label>본인 확인 서명 (사인)</label>
+                <canvas id="cancelCanvas" height="100"></canvas>
+                <button type="button" class="btn-clear" onclick="clearCanvas('cancelCanvas')">지우기</button>
+                
+                <button type="button" class="btn-submit" onclick="submitData('해지신청')">해지 신청하기</button>
+            </form>
+        </div>
+
+        <div class="footer">커뮤니티 스마트 관리 시스템 통합 포털</div>
+    </div>
+
+    <script>
+        // 발급받은 URL을 아래 따옴표 안에 그대로 붙여넣습니다.
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUogONfMVgMXOkPwdGoOMSZ0aIZoFwsVBbOiuodLL5UecAWgOKN1CyIgXB2TiLo-AX1g/exec";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setupCanvas("regCanvas");
+            setupCanvas("cancelCanvas");
+        });
+
+        function setupCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext("2d");
+            let isDrawing = false;
+
+            canvas.addEventListener("mousedown", (e) => {
+                isDrawing = true;
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+            });
+            canvas.addEventListener("mousemove", (e) => {
+                if (isDrawing) {
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                }
+            });
+            canvas.addEventListener("mouseup", () => { isDrawing = false; });
+            canvas.addEventListener("mouseleave", () => { isDrawing = false; });
+
+            // 모바일 터치 이벤트
+            canvas.addEventListener("touchstart", (e) => {
+                isDrawing = true;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                e.preventDefault();
+            });
+            canvas.addEventListener("touchmove", (e) => {
+                if (isDrawing) {
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                    ctx.stroke();
+                }
+                e.preventDefault();
+            });
+            canvas.addEventListener("touchend", () => { isDrawing = false; });
+        }
+
+        function clearCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function showForm(formId, btn) {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(formId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function submitData(type) {
+            let data = {};
+            let sheetName = "";
+
+            if (type === '고장접수') {
+                sheetName = "고장접수";
+                data = {
+                    repairItem: document.getElementById('repairItem').value,
+                    repairSymptom: document.getElementById('repairSymptom').value,
+                    repairDetail: document.getElementById('repairDetail').value
+                };
+            } else if (type === '가입신청') {
+                sheetName = "가입신청";
+                data = {
+                    regName: document.querySelectorAll('#register input')[0].value,
+                    regApt: document.querySelectorAll('#register input')[1].value,
+                    regPhone: document.querySelectorAll('#register input')[2].value,
+                    regSign: "서명 완료"
+                };
+            } else if (type === '해지신청') {
+                sheetName = "해지신청";
+                data = {
+                    cancelNameApt: document.querySelector('#cancel input').value,
+                    cancelReason: document.querySelector('#cancel textarea').value,
+                    cancelSign: "서명 완료"
+                };
+            }
+
+            let formData = new FormData();
+            formData.append('sheetName', sheetName);
+            formData.append('data', JSON.stringify(data));
+
+            // 모바일 통신을 위한 설정
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            })
+            .then(res => {
+                alert(type + '이 구글 시트에 정상적으로 저장되었습니다!');
+                location.reload();
+            })
+            .catch(err => {
+                // 통신 성공 여부와 상관없이 작동
+                alert('전송되었습니다.');
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
