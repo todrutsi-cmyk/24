@@ -161,6 +161,8 @@ body::after {
   color: var(--text-dim);
   transition: color 0.25s;
   letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.35;
 }
 
 .nav-btn.active .nav-btn-kr { color: var(--gold-lt); }
@@ -715,16 +717,16 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
         <span class="nav-btn-kr">메인</span>
       </button>
       <button class="nav-btn" onclick="showForm('repair',this)">
-        <span class="nav-btn-kr">고장접수</span>
+        <span class="nav-btn-kr">고장<br>접수</span>
       </button>
       <button class="nav-btn" onclick="showForm('register',this)">
-        <span class="nav-btn-kr">가입신청</span>
+        <span class="nav-btn-kr">가입<br>신청</span>
       </button>
       <button class="nav-btn" onclick="showForm('ot_reservation',this)">
-        <span class="nav-btn-kr">OT예약</span>
+        <span class="nav-btn-kr">OT<br>예약</span>
       </button>
       <button class="nav-btn" onclick="showForm('cancel',this)">
-        <span class="nav-btn-kr">해지신청</span>
+        <span class="nav-btn-kr">해지<br>신청</span>
       </button>
     </nav>
   </div>
