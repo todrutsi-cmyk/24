@@ -249,7 +249,6 @@
     </div>
 
     <script>
-        // 새로 발급받은 Google Apps Script URL이 적용되었습니다.
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVP0l7ByVic7tIEmrfRLT1piER9vtN5LsrcdAL-MEbJr2nryPGWoCfAFlF2Rt6xxeuuA/exec";
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -311,6 +310,27 @@
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 if (btn) btn.classList.add('active');
             }
+            
+            // 메인 화면으로 이동할 때 입력된 데이터를 모두 초기화
+            if (formId === 'dashboard') {
+                resetAllForms();
+            }
+        }
+        
+        function resetAllForms() {
+            // 텍스트 및 선택창 초기화
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                if (input.type !== 'radio') {
+                    input.value = '';
+                } else {
+                    if (input.value === '오전') input.checked = true;
+                }
+            });
+            // 서명 캔버스 초기화
+            clearCanvas('regCanvas');
+            clearCanvas('otCanvas');
+            clearCanvas('cancelCanvas');
         }
 
         function submitData(type) {
@@ -361,9 +381,11 @@
                 body: formData
             })
             .then(res => {
+                resetAllForms(); // 제출 성공 후 입력창 비우기
                 showForm('success_screen');
             })
             .catch(err => {
+                resetAllForms(); // 오류 발생 시에도 사용자 편의를 위해 비우기
                 showForm('success_screen');
             });
         }
