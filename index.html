@@ -68,6 +68,13 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
+        /* 동/호수 칸을 나란히 배치하기 위한 그리드 레이아웃 */
+        .apt-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         .radio-group {
             display: flex;
             gap: 20px;
@@ -183,8 +190,18 @@
             <form>
                 <label>이름</label>
                 <input type="text" placeholder="성함을 입력하세요">
-                <label>동/호수</label>
-                <input type="text" placeholder="예) 101동 1502호">
+                
+                <div class="apt-group">
+                    <div>
+                        <label>동</label>
+                        <input type="text" placeholder="예) 101">
+                    </div>
+                    <div>
+                        <label>호수</label>
+                        <input type="text" placeholder="예) 1502">
+                    </div>
+                </div>
+
                 <label>연락처</label>
                 <input type="tel" placeholder="010-0000-0000">
                 
@@ -202,8 +219,18 @@
             <form>
                 <label>이름</label>
                 <input type="text" placeholder="성함을 입력하세요">
-                <label>동/호수</label>
-                <input type="text" placeholder="예) 101동 1502호">
+                
+                <div class="apt-group">
+                    <div>
+                        <label>동</label>
+                        <input type="text" placeholder="예) 101">
+                    </div>
+                    <div>
+                        <label>호수</label>
+                        <input type="text" placeholder="예) 1502">
+                    </div>
+                </div>
+
                 <label>연락처</label>
                 <input type="tel" placeholder="010-0000-0000">
                 
@@ -225,8 +252,20 @@
         <div id="cancel" class="form-section">
             <h2>⚠️ 회원 해지 신청</h2>
             <form>
-                <label>이름 / 동호수</label>
-                <input type="text" placeholder="성함과 동호수를 입력하세요">
+                <label>이름</label>
+                <input type="text" placeholder="성함을 입력하세요">
+
+                <div class="apt-group">
+                    <div>
+                        <label>동</label>
+                        <input type="text" placeholder="예) 101">
+                    </div>
+                    <div>
+                        <label>호수</label>
+                        <input type="text" placeholder="예) 1502">
+                    </div>
+                </div>
+                
                 <label>해지 사유</label>
                 <textarea rows="3" placeholder="해지 사유를 간단히 적어주세요 (시설 불만족, 이사 등)"></textarea>
                 
@@ -311,14 +350,12 @@
                 if (btn) btn.classList.add('active');
             }
             
-            // 메인 화면으로 이동할 때 입력된 데이터를 모두 초기화
             if (formId === 'dashboard') {
                 resetAllForms();
             }
         }
         
         function resetAllForms() {
-            // 텍스트 및 선택창 초기화
             const inputs = document.querySelectorAll('input, textarea, select');
             inputs.forEach(input => {
                 if (input.type !== 'radio') {
@@ -327,7 +364,6 @@
                     if (input.value === '오전') input.checked = true;
                 }
             });
-            // 서명 캔버스 초기화
             clearCanvas('regCanvas');
             clearCanvas('otCanvas');
             clearCanvas('cancelCanvas');
@@ -346,26 +382,30 @@
                 };
             } else if (type === '가입신청') {
                 sheetName = "가입신청";
+                // 입력받는 인덱스에 맞춰 요소를 가져옴 (이름, 동, 호수, 연락처 순)
+                const inputs = document.querySelectorAll('#register input');
                 data = {
-                    regName: document.querySelectorAll('#register input')[0].value,
-                    regApt: document.querySelectorAll('#register input')[1].value,
-                    regPhone: document.querySelectorAll('#register input')[2].value,
+                    regName: inputs[0].value,
+                    regApt: inputs[1].value + "동 " + inputs[2].value + "호",
+                    regPhone: inputs[3].value,
                     regSign: "서명 완료"
                 };
             } else if (type === 'OT예약') {
                 sheetName = "OT예약";
+                const inputs = document.querySelectorAll('#ot_reservation input');
                 const otTimeValue = document.querySelector('input[name="otTime"]:checked').value;
                 data = {
-                    otName: document.querySelectorAll('#ot_reservation input')[0].value,
-                    otApt: document.querySelectorAll('#ot_reservation input')[1].value,
-                    otPhone: document.querySelectorAll('#ot_reservation input')[2].value,
+                    otName: inputs[0].value,
+                    otApt: inputs[1].value + "동 " + inputs[2].value + "호",
+                    otPhone: inputs[3].value,
                     otTime: otTimeValue,
                     otSign: "서명 완료"
                 };
             } else if (type === '해지신청') {
                 sheetName = "해지신청";
+                const inputs = document.querySelectorAll('#cancel input');
                 data = {
-                    cancelNameApt: document.querySelector('#cancel input').value,
+                    cancelNameApt: inputs[0].value + " / " + inputs[1].value + "동 " + inputs[2].value + "호",
                     cancelReason: document.querySelector('#cancel textarea').value,
                     cancelSign: "서명 완료"
                 };
@@ -381,11 +421,11 @@
                 body: formData
             })
             .then(res => {
-                resetAllForms(); // 제출 성공 후 입력창 비우기
+                resetAllForms();
                 showForm('success_screen');
             })
             .catch(err => {
-                resetAllForms(); // 오류 발생 시에도 사용자 편의를 위해 비우기
+                resetAllForms();
                 showForm('success_screen');
             });
         }
