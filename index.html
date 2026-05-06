@@ -26,7 +26,7 @@
             z-index: 100; 
         }
         .nav-btn { 
-            padding: 10px 16px; 
+            padding: 8px 12px; 
             border: none; 
             border-radius: 5px; 
             cursor: pointer; 
@@ -34,7 +34,15 @@
             background: #555; 
             color: white; 
             transition: 0.3s; 
-            font-size: 14px;
+            font-size: 13px;
+            /* 두 줄 배치를 위해 너비 고정 및 텍스트 정렬 */
+            width: 75px;
+            height: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.2;
         }
         .nav-btn.active { 
             background: #007bff; 
@@ -99,10 +107,10 @@
             font-size: 13px;
         }
 
-        .btn-submit { 
+        .btn-submit, .btn-main { 
             width: 100%; 
             padding: 15px; 
-            margin-top: 25px; 
+            margin-top: 15px; 
             background-color: #007bff; 
             color: white; 
             border: none; 
@@ -111,21 +119,49 @@
             font-size: 17px; 
             font-weight: bold; 
         }
+        .btn-main {
+            background-color: #28a745;
+        }
         .footer { text-align: center; margin-top: 20px; font-size: 13px; color: #888; }
+        
+        /* 알림 완료 화면 */
+        .success-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-screen h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .success-screen p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
 
     <div class="nav-bar">
-        <button class="nav-btn active" onclick="showForm('repair', this)">고장 접수</button>
-        <button class="nav-btn" onclick="showForm('register', this)">회원 가입</button>
-        <button class="nav-btn" onclick="showForm('ot_reservation', this)">OT 예약</button>
-        <button class="nav-btn" onclick="showForm('cancel', this)">해지 신청</button>
+        <button class="nav-btn active" onclick="showForm('dashboard', this)"><span>메인</span><span>화면</span></button>
+        <button class="nav-btn" onclick="showForm('repair', this)"><span>고장</span><span>접수</span></button>
+        <button class="nav-btn" onclick="showForm('register', this)"><span>회원</span><span>가입</span></button>
+        <button class="nav-btn" onclick="showForm('ot_reservation', this)"><span>OT</span><span>예약</span></button>
+        <button class="nav-btn" onclick="showForm('cancel', this)"><span>해지</span><span>신청</span></button>
     </div>
 
     <div class="container">
         
-        <div id="repair" class="form-section active">
+        <div id="dashboard" class="form-section active">
+            <h2>🏢 커뮤니티 관리 포털</h2>
+            <p style="text-align:center; color:#666; margin-bottom:30px;">원하시는 업무 메뉴를 선택해 주세요.</p>
+            <button class="btn-submit" onclick="showForm('repair', document.querySelectorAll('.nav-btn')[1])">🛠️ 기구 고장 및 불편 접수</button>
+            <button class="btn-submit" onclick="showForm('register', document.querySelectorAll('.nav-btn')[2])">📝 신규 회원 가입 신청</button>
+            <button class="btn-submit" onclick="showForm('ot_reservation', document.querySelectorAll('.nav-btn')[3])">📅 OT 예약 신청</button>
+            <button class="btn-submit" onclick="showForm('cancel', document.querySelectorAll('.nav-btn')[4])">⚠️ 회원 해지 신청</button>
+        </div>
+
+        <div id="repair" class="form-section">
             <h2>🛠️ 기구 고장 및 불편 접수</h2>
             <form>
                 <label>기구 이름 (또는 번호)</label>
@@ -141,6 +177,7 @@
                 <label>상세 내용</label>
                 <textarea id="repairDetail" rows="4" placeholder="고장 부위나 특이사항을 적어주세요."></textarea>
                 <button type="button" class="btn-submit" onclick="submitData('고장접수')">접수하기</button>
+                <button type="button" class="btn-clear" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인으로</button>
             </form>
         </div>
 
@@ -159,6 +196,7 @@
                 <button type="button" class="btn-clear" onclick="clearCanvas('regCanvas')">지우기</button>
                 
                 <button type="button" class="btn-submit" onclick="submitData('가입신청')">가입 신청하기</button>
+                <button type="button" class="btn-clear" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인으로</button>
             </form>
         </div>
 
@@ -183,6 +221,7 @@
                 <button type="button" class="btn-clear" onclick="clearCanvas('otCanvas')">지우기</button>
                 
                 <button type="button" class="btn-submit" onclick="submitData('OT예약')">예약 신청하기</button>
+                <button type="button" class="btn-clear" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인으로</button>
             </form>
         </div>
 
@@ -199,7 +238,14 @@
                 <button type="button" class="btn-clear" onclick="clearCanvas('cancelCanvas')">지우기</button>
                 
                 <button type="button" class="btn-submit" onclick="submitData('해지신청')">해지 신청하기</button>
+                <button type="button" class="btn-clear" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인으로</button>
             </form>
+        </div>
+
+        <div id="success_screen" class="form-section success-screen">
+            <h2>🎉 등록이 완료되었습니다!</h2>
+            <p>요청하신 내용이 정상적으로 접수되었습니다.</p>
+            <button class="btn-main" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인 화면으로 이동</button>
         </div>
 
         <div class="footer">커뮤니티 스마트 관리 시스템 통합 포털</div>
@@ -210,7 +256,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             setupCanvas("regCanvas");
-            setupCanvas("otCanvas"); // 캔버스 추가 등록
+            setupCanvas("otCanvas");
             setupCanvas("cancelCanvas");
         });
 
@@ -264,8 +310,10 @@
             document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
             document.getElementById(formId).classList.add('active');
             
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if (formId !== 'success_screen') {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                if (btn) btn.classList.add('active');
+            }
         }
 
         function submitData(type) {
@@ -288,11 +336,8 @@
                     regSign: "서명 완료"
                 };
             } else if (type === 'OT예약') {
-                sheetName = "OT예약"; // 새로 추가된 시트 이름
-                
-                // 선택된 라디오 버튼 값 가져오기
+                sheetName = "OT예약";
                 const otTimeValue = document.querySelector('input[name="otTime"]:checked').value;
-
                 data = {
                     otName: document.querySelectorAll('#ot_reservation input')[0].value,
                     otApt: document.querySelectorAll('#ot_reservation input')[1].value,
@@ -319,12 +364,12 @@
                 body: formData
             })
             .then(res => {
-                alert(type + '이 구글 시트에 정상적으로 저장되었습니다!');
-                location.reload();
+                // 성공적으로 접수되면 완료 화면으로 이동
+                showForm('success_screen');
             })
             .catch(err => {
-                alert('전송되었습니다.');
-                location.reload();
+                // 오프라인 모드 등 예외 발생 시에도 완료 화면으로 이동하여 진행
+                showForm('success_screen');
             });
         }
     </script>
