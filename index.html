@@ -26,7 +26,7 @@
             z-index: 100; 
         }
         .nav-btn { 
-            padding: 10px 20px; 
+            padding: 10px 16px; 
             border: none; 
             border-radius: 5px; 
             cursor: pointer; 
@@ -34,6 +34,7 @@
             background: #555; 
             color: white; 
             transition: 0.3s; 
+            font-size: 14px;
         }
         .nav-btn.active { 
             background: #007bff; 
@@ -60,7 +61,7 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
-        /* 라디오 버튼 스타일 추가 */
+        /* 라디오 버튼 스타일 */
         .radio-group {
             display: flex;
             gap: 20px;
@@ -118,6 +119,7 @@
     <div class="nav-bar">
         <button class="nav-btn active" onclick="showForm('repair', this)">고장 접수</button>
         <button class="nav-btn" onclick="showForm('register', this)">회원 가입</button>
+        <button class="nav-btn" onclick="showForm('ot_reservation', this)">OT 예약</button>
         <button class="nav-btn" onclick="showForm('cancel', this)">해지 신청</button>
     </div>
 
@@ -152,17 +154,35 @@
                 <label>연락처</label>
                 <input type="tel" placeholder="010-0000-0000">
                 
-                <label>OT 예약 (오전/오후 선택)</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="regOT" value="오전" checked> 오전</label>
-                    <label><input type="radio" name="regOT" value="오후"> 오후</label>
-                </div>
-                
                 <label>본인 확인 서명 (사인)</label>
                 <canvas id="regCanvas" height="100"></canvas>
                 <button type="button" class="btn-clear" onclick="clearCanvas('regCanvas')">지우기</button>
                 
                 <button type="button" class="btn-submit" onclick="submitData('가입신청')">가입 신청하기</button>
+            </form>
+        </div>
+
+        <div id="ot_reservation" class="form-section">
+            <h2>📅 OT 예약 신청</h2>
+            <form>
+                <label>이름</label>
+                <input type="text" placeholder="성함을 입력하세요">
+                <label>동/호수</label>
+                <input type="text" placeholder="예) 101동 1502호">
+                <label>연락처</label>
+                <input type="tel" placeholder="010-0000-0000">
+                
+                <label>시간대 선택 (오전/오후)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="otTime" value="오전" checked> 오전</label>
+                    <label><input type="radio" name="otTime" value="오후"> 오후</label>
+                </div>
+                
+                <label>본인 확인 서명 (사인)</label>
+                <canvas id="otCanvas" height="100"></canvas>
+                <button type="button" class="btn-clear" onclick="clearCanvas('otCanvas')">지우기</button>
+                
+                <button type="button" class="btn-submit" onclick="submitData('OT예약')">예약 신청하기</button>
             </form>
         </div>
 
@@ -190,6 +210,7 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             setupCanvas("regCanvas");
+            setupCanvas("otCanvas"); // 캔버스 추가 등록
             setupCanvas("cancelCanvas");
         });
 
@@ -260,16 +281,24 @@
                 };
             } else if (type === '가입신청') {
                 sheetName = "가입신청";
-                
-                // 선택된 라디오 버튼 값 가져오기
-                const otValue = document.querySelector('input[name="regOT"]:checked').value;
-
                 data = {
                     regName: document.querySelectorAll('#register input')[0].value,
                     regApt: document.querySelectorAll('#register input')[1].value,
                     regPhone: document.querySelectorAll('#register input')[2].value,
-                    regOT: otValue, // OT 예약 값 추가
                     regSign: "서명 완료"
+                };
+            } else if (type === 'OT예약') {
+                sheetName = "OT예약"; // 새로 추가된 시트 이름
+                
+                // 선택된 라디오 버튼 값 가져오기
+                const otTimeValue = document.querySelector('input[name="otTime"]:checked').value;
+
+                data = {
+                    otName: document.querySelectorAll('#ot_reservation input')[0].value,
+                    otApt: document.querySelectorAll('#ot_reservation input')[1].value,
+                    otPhone: document.querySelectorAll('#ot_reservation input')[2].value,
+                    otTime: otTimeValue,
+                    otSign: "서명 완료"
                 };
             } else if (type === '해지신청') {
                 sheetName = "해지신청";
