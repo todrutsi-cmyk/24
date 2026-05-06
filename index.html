@@ -1,3 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>커뮤니티 관리 포털</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --ink:    #0d0b08;
+  --warm-1: #141009;
+  --warm-2: #1e1810;
+  --warm-3: #2a2218;
+  --warm-4: #362d1f;
+  --gold:   #c9a84c;
+  --gold-lt: #e2c97e;
+  --gold-dim: rgba(201,168,76,0.12);
+  --gold-border: rgba(201,168,76,0.22);
+  --gold-glow: rgba(201,168,76,0.08);
+  --cream:  #f5efe3;
+  --cream-2: #e8dfc8;
+  --text-gold: #c9a84c;
+  --text-cream: #f5efe3;
+  --text-mid: #9a8a72;
+  --text-dim: #5c5040;
+  --serif: 'Cormorant Garamond', 'Noto Serif KR', Georgia, serif;
+  --display: 'Cinzel', serif;
+  --sans: 'Noto Sans KR', sans-serif;
+  --r: 4px;
+  --r-lg: 12px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--text-cream);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── TEXTURE OVERLAY ── */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 40% at 80% 110%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Subtle noise grain */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  opacity:0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── HEADER ── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  width: 100%;
+  background: rgba(13,11,8,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--gold-border);
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Wordmark */
+.wordmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  width: 100%;
+}
+
+.wordmark-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-border));
+}
+.wordmark-line.right {
+  background: linear-gradient(90deg, var(--gold-border), transparent);
+}
+
+.wordmark-text {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* NAV TABS */
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+  width: 100%;
+}
+
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.nav-btn::after {
+  content:'';
+  position:absolute;
+  bottom:0; left:50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px; height: 1px;
+  background: var(--gold);
+  transition: transform 0.3s ease;
+}
+
+.nav-btn.active::after { transform: translateX(-50%) scaleX(1); }
+
+.nav-btn-kr {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: color 0.25s;
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.nav-btn.active .nav-btn-kr { color: var(--gold-lt); }
+.nav-btn:hover .nav-btn-kr { color: var(--text-mid); }
+
+/* ── MAIN CONTAINER ── */
+.container {
+  position: relative;
+  z-index: 1;
+  width: 92%;
+  max-width: 460px;
+  margin: 32px 0 80px;
+}
+
+/* ── SECTIONS ── */
+.form-section { display: none; }
+.form-section.active {
+  display: block;
+  animation: pageIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── ORNAMENT ── */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.ornament-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-border) 40%, transparent);
+}
+.ornament-diamond {
+  width: 5px; height: 5px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--warm-1);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(201,168,76,0.15) inset,
+    0 32px 64px rgba(0,0,0,0.6),
+    0 2px 4px rgba(0,0,0,0.4);
+}
+
+.card-top-accent {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--gold-lt) 50%, var(--gold) 70%, transparent 100%);
+}
+
+.card-body { padding: 28px 24px 32px; }
+
+/* ── SECTION HEADER ── */
+.sec-eyebrow {
+  font-family: var(--display);
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  color: var(--text-gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.sec-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text-cream);
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.sec-title em {
+  font-style: italic;
+  color: var(--gold-lt);
+}
+
+.sec-sub {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 0.03em;
+  margin-bottom: 28px;
+}
+
+/* ── DASHBOARD MENU ── */
+.dash-menu { display: flex; flex-direction: column; gap: 8px; }
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: var(--warm-2);
+  border: 1px solid rgba(201,168,76,0.1);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item::before {
+  content:'';
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width: 2px;
+  background: var(--gold);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.menu-item:hover {
+  background: var(--warm-3);
+  border-color: var(--gold-border);
+  transform: translateX(3px);
+}
+
+.menu-item:hover::before { transform: scaleY(1); }
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.menu-num {
+  font-family: var(--display);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  min-width: 18px;
+}
+
+.menu-text {}
+.menu-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-cream);
+  letter-spacing: 0.02em;
+  margin-bottom: 3px;
+}
+.menu-desc {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  font-weight: 300;
+}
+
+.menu-arrow {
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: all 0.25s;
+}
+.menu-item:hover .menu-arrow {
+  color: var(--gold);
+  transform: translateX(3px);
+}
+
+.menu-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.12) 30%, rgba(201,168,76,0.12) 70%, transparent);
+  margin: 4px 0;
+}
+
+/* Inquiry special button */
+.menu-item-inquiry {
+  background: var(--gold-dim);
+  border-color: var(--gold-border);
+}
+.menu-item-inquiry .menu-title { color: var(--gold-lt); }
+.menu-item-inquiry .menu-num { color: var(--gold); }
+
+/* ── FORM ── */
+.form-header {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  text-align: center;
+}
+
+/* ── FIELD ── */
+.field { margin-bottom: 16px; }
+
+.field-label {
+  display: block;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+input[type="text"],
+input[type="tel"],
+select,
+textarea {
+  width: 100%;
+  background: var(--warm-2);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: var(--r);
+  color: var(--text-cream);
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 300;
+  padding: 14px 16px;
+  transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
+  -webkit-appearance: none;
+  appearance: none;
+  letter-spacing: 0.02em;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(201,168,76,0.5);
+  background: var(--warm-3);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.06), 0 1px 0 rgba(201,168,76,0.2) inset;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5' fill='none' stroke='%235c5040' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+select option { background: var(--warm-2); color: var(--text-cream); }
+
+textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+
+/* ── RADIO ── */
+.radio-group { display: flex; gap: 8px; }
+
+.radio-opt { flex: 1; position: relative; }
+.radio-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.radio-opt label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  background: var(--warm-2);
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--text-mid);
+  transition: all 0.22s;
+  letter-spacing: 0.04em;
+}
+
+.radio-opt input[type="radio"]:checked + label {
+  background: var(--gold-dim);
+  border-color: rgba(201,168,76,0.45);
+  color: var(--gold-lt);
+}
+
+/* ── CANVAS ── */
+.canvas-wrap { position: relative; margin-top: 6px; }
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 88px;
+  background: var(--warm-2);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: var(--r);
+  cursor: crosshair;
+  touch-action: none;
+  transition: border-color 0.2s;
+}
+
+canvas:hover { border-color: rgba(201,168,76,0.3); }
+
+.canvas-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--display);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.btn-clr {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: var(--warm-3);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 3px;
+  color: var(--text-dim);
+  font-family: var(--display);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-clr:hover { color: var(--gold); border-color: var(--gold-border); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  margin-top: 22px;
+  background: linear-gradient(180deg,
+    rgba(201,168,76,0.15) 0%,
+    rgba(201,168,76,0.06) 100%);
+  border: 1px solid rgba(201,168,76,0.45);
+  border-radius: var(--r);
+  color: var(--gold-lt);
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2,0,0,1);
+  box-shadow: 0 1px 0 rgba(201,168,76,0.2) inset;
+}
+
+.btn-primary::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.08), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(180deg,
+    rgba(201,168,76,0.25) 0%,
+    rgba(201,168,76,0.12) 100%);
+  border-color: rgba(201,168,76,0.7);
+  box-shadow: 0 0 30px rgba(201,168,76,0.12), 0 1px 0 rgba(201,168,76,0.3) inset;
+  transform: translateY(-1px);
+}
+
+.btn-primary:hover::before { transform: translateX(100%); }
+.btn-primary:active { transform: scale(0.99); }
+
+.btn-back {
+  width: 100%;
+  padding: 11px;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.08);
+  border-radius: var(--r);
+  color: var(--text-dim);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-back:hover {
+  border-color: rgba(201,168,76,0.2);
+  color: var(--text-mid);
+}
+
+/* ── RESULT ── */
+.result-box {
+  display: none;
+  background: var(--warm-2);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--r);
+  padding: 18px;
+  margin-top: 14px;
+  animation: pageIn 0.3s ease;
+}
+.result-box.active { display: block; }
+
+.result-head {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-gold);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+
+.result-row {
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+}
+.result-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.result-type {
+  font-family: var(--display);
+  font-size: 10.5px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.result-detail { font-size: 14px; color: var(--text-mid); font-weight: 300; line-height: 1.5; }
+
+/* ── SUCCESS ── */
+.success-wrap {
+  text-align: center;
+  padding: 48px 20px 40px;
+}
+
+.success-diamond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.diamond-shape {
+  width: 48px; height: 48px;
+  border: 1.5px solid var(--gold);
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.diamond-shape::before {
+  content:'';
+  position:absolute;
+  inset: 5px;
+  border: 1px solid rgba(201,168,76,0.3);
+}
+
+.diamond-inner {
+  transform: rotate(-45deg);
+  color: var(--gold-lt);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.success-title {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold-lt);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.success-sub {
+  font-size: 14.5px;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+  margin-bottom: 32px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  margin-top: 28px;
+  padding-bottom: 20px;
+}
+
+.footer-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.footer-text {
+  font-family: var(--display);
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── STAGGER ANIMATION ── */
+.card-body > * { animation: itemIn 0.5s ease both; }
+.card-body > *:nth-child(1) { animation-delay: 0.05s; }
+.card-body > *:nth-child(2) { animation-delay: 0.10s; }
+.card-body > *:nth-child(3) { animation-delay: 0.15s; }
+.card-body > *:nth-child(4) { animation-delay: 0.18s; }
+.card-body > *:nth-child(5) { animation-delay: 0.21s; }
+.card-body > *:nth-child(6) { animation-delay: 0.24s; }
+
+@keyframes itemIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.menu-item:nth-child(1) { animation-delay: 0.08s; }
+.menu-item:nth-child(2) { animation-delay: 0.13s; }
+.menu-item:nth-child(3) { animation-delay: 0.18s; }
+.menu-item:nth-child(4) { animation-delay: 0.23s; }
+.menu-item:nth-child(5) { animation-delay: 0.28s; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="wordmark">
+      <div class="wordmark-line"></div>
+      <span class="wordmark-text">Community Management Portal</span>
+      <div class="wordmark-line right"></div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-btn active" onclick="showForm('dashboard',this)">
+        <span class="nav-btn-kr">메인</span>
+      </button>
+      <button class="nav-btn" onclick="showForm('repair',this)">
+        <span class="nav-btn-kr">고장<br>접수</span>
+      </button>
+      <button class="nav-btn" onclick="showForm('register',this)">
+        <span class="nav-btn-kr">가입<br>신청</span>
+      </button>
+      <button class="nav-btn" onclick="showForm('ot_reservation',this)">
+        <span class="nav-btn-kr">OT<br>예약</span>
+      </button>
+      <button class="nav-btn" onclick="showForm('cancel',this)">
+        <span class="nav-btn-kr">해지<br>신청</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div id="dashboard" class="form-section active">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+        <p class="sec-eyebrow">Community Management</p>
+        <h1 class="sec-title">커뮤니티 관리 포털</h1>
+        <p class="sec-sub">업무를 선택해 주십시오</p>
+
+        <div class="dash-menu">
+          <div class="menu-item" onclick="showForm('repair', document.querySelectorAll('.nav-btn')[1])">
+            <div class="menu-left">
+              <span class="menu-num">01</span>
+              <div class="menu-text">
+                <div class="menu-title">기구 고장 및 불편 접수</div>
+                <div class="menu-desc">시설물 고장·이상 신고</div>
+              </div>
+            </div>
+            <span class="menu-arrow">→</span>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="menu-item" onclick="showForm('register', document.querySelectorAll('.nav-btn')[2])">
+            <div class="menu-left">
+              <span class="menu-num">02</span>
+              <div class="menu-text">
+                <div class="menu-title">신규 회원 가입 신청</div>
+                <div class="menu-desc">멤버십 등록 접수</div>
+              </div>
+            </div>
+            <span class="menu-arrow">→</span>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="menu-item" onclick="showForm('ot_reservation', document.querySelectorAll('.nav-btn')[3])">
+            <div class="menu-left">
+              <span class="menu-num">03</span>
+              <div class="menu-text">
+                <div class="menu-title">OT 예약 신청</div>
+                <div class="menu-desc">오리엔테이션 시간 선택</div>
+              </div>
+            </div>
+            <span class="menu-arrow">→</span>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="menu-item" onclick="showForm('cancel', document.querySelectorAll('.nav-btn')[4])">
+            <div class="menu-left">
+              <span class="menu-num">04</span>
+              <div class="menu-text">
+                <div class="menu-title">회원 해지 신청</div>
+                <div class="menu-desc">멤버십 해지 처리</div>
+              </div>
+            </div>
+            <span class="menu-arrow">→</span>
+          </div>
+
+          <div class="menu-divider"></div>
+
+          <div class="menu-item menu-item-inquiry" onclick="showForm('inquiry', null)">
+            <div class="menu-left">
+              <span class="menu-num">◈</span>
+              <div class="menu-text">
+                <div class="menu-title">내 등록 내역 조회</div>
+                <div class="menu-desc">동·호수로 접수 내역 확인</div>
+              </div>
+            </div>
+            <span class="menu-arrow" style="color:var(--gold)">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-ornament">
+        <div class="ornament-line" style="max-width:60px"></div>
+        <div class="ornament-diamond"></div>
+        <div class="ornament-line" style="max-width:60px; background:linear-gradient(90deg,var(--gold-border),transparent)"></div>
+      </div>
+      <p class="footer-text">Smart Community Management System</p>
+    </div>
+  </div>
+
+  <!-- ══ REPAIR ══ -->
+  <div id="repair" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="form-header">
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+          <p class="sec-eyebrow">Facility Report</p>
+          <h2 class="sec-title">기구 고장 접수</h2>
+          <p class="sec-sub">고장 내용을 입력하시면 관리팀에 전달됩니다</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">동 · 호수</label>
+          <div class="field-row">
+            <input type="text" id="repairDong" placeholder="동  예) 101">
+            <input type="text" id="repairHo" placeholder="호수  예) 1502">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">기구명 또는 번호</label>
+          <input type="text" id="repairItem" placeholder="예) 런닝머신 3번">
+        </div>
+        <div class="field">
+          <label class="field-label">고장 증상</label>
+          <select id="repairSymptom">
+            <option selected disabled value="">증상을 선택해 주세요</option>
+            <option>작동 불능</option>
+            <option>소음 발생</option>
+            <option>부품 파손</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">상세 내용</label>
+          <textarea id="repairDetail" placeholder="고장 부위나 특이사항을 적어주세요."></textarea>
+        </div>
+
+        <button class="btn-primary" onclick="submitData('고장접수')">접수 신청</button>
+        <button class="btn-back" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">← 메인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REGISTER ══ -->
+  <div id="register" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="form-header">
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+          <p class="sec-eyebrow">New Membership</p>
+          <h2 class="sec-title">신규 회원 가입</h2>
+          <p class="sec-sub">정보를 입력하시고 서명란에 서명해 주세요</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">성함</label>
+          <input type="text" id="regName" placeholder="성함을 입력하세요">
+        </div>
+        <div class="field">
+          <label class="field-label">동 · 호수</label>
+          <div class="field-row">
+            <input type="text" id="regDong" placeholder="동  예) 101">
+            <input type="text" id="regHo" placeholder="호수  예) 1502">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">연락처</label>
+          <input type="tel" id="regPhone" placeholder="010-0000-0000">
+        </div>
+        <div class="field">
+          <label class="field-label">본인 확인 서명</label>
+          <div class="canvas-wrap">
+            <canvas id="regCanvas" height="100"></canvas>
+            <span class="canvas-label" id="regCanvasLabel">이 곳에 서명해 주세요</span>
+            <button type="button" class="btn-clr" onclick="clearCanvas('regCanvas')">지우기</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitData('가입신청')">가입 신청</button>
+        <button class="btn-back" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">← 메인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ OT ══ -->
+  <div id="ot_reservation" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="form-header">
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+          <p class="sec-eyebrow">Orientation</p>
+          <h2 class="sec-title">OT 예약 신청</h2>
+          <p class="sec-sub">선호 시간대를 선택해 주세요</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">성함</label>
+          <input type="text" id="otName" placeholder="성함을 입력하세요">
+        </div>
+        <div class="field">
+          <label class="field-label">동 · 호수</label>
+          <div class="field-row">
+            <input type="text" id="otDong" placeholder="동  예) 101">
+            <input type="text" id="otHo" placeholder="호수  예) 1502">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">연락처</label>
+          <input type="tel" id="otPhone" placeholder="010-0000-0000">
+        </div>
+        <div class="field">
+          <label class="field-label">시간대 선택</label>
+          <div class="radio-group">
+            <div class="radio-opt">
+              <input type="radio" name="otTime" id="t-am" value="오전" checked>
+              <label for="t-am">오전</label>
+            </div>
+            <div class="radio-opt">
+              <input type="radio" name="otTime" id="t-pm" value="오후">
+              <label for="t-pm">오후</label>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">본인 확인 서명</label>
+          <div class="canvas-wrap">
+            <canvas id="otCanvas" height="100"></canvas>
+            <span class="canvas-label" id="otCanvasLabel">이 곳에 서명해 주세요</span>
+            <button type="button" class="btn-clr" onclick="clearCanvas('otCanvas')">지우기</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitData('OT예약')">예약 신청</button>
+        <button class="btn-back" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">← 메인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CANCEL ══ -->
+  <div id="cancel" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="form-header">
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+          <p class="sec-eyebrow">Membership Cancellation</p>
+          <h2 class="sec-title">회원 해지 신청</h2>
+          <p class="sec-sub">해지 후 재가입 시 신규 등록이 필요합니다</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">성함</label>
+          <input type="text" id="cancelName" placeholder="성함을 입력하세요">
+        </div>
+        <div class="field">
+          <label class="field-label">동 · 호수</label>
+          <div class="field-row">
+            <input type="text" id="cancelDong" placeholder="동  예) 101">
+            <input type="text" id="cancelHo" placeholder="호수  예) 1502">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">연락처</label>
+          <input type="tel" id="cancelPhone" placeholder="010-0000-0000">
+        </div>
+        <div class="field">
+          <label class="field-label">해지 사유</label>
+          <select id="cancelReason">
+            <option value="" disabled selected>해지 사유를 선택해 주세요</option>
+            <option>개인 사정</option>
+            <option>이사</option>
+            <option>시설 이용 불편</option>
+            <option>건강상의 이유</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">본인 확인 서명</label>
+          <div class="canvas-wrap">
+            <canvas id="cancelCanvas" height="100"></canvas>
+            <span class="canvas-label" id="cancelCanvasLabel">이 곳에 서명해 주세요</span>
+            <button type="button" class="btn-clr" onclick="clearCanvas('cancelCanvas')">지우기</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitData('해지신청')">해지 신청</button>
+        <button class="btn-back" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">← 메인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INQUIRY ══ -->
+  <div id="inquiry" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="form-header">
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line"></div></div>
+          <p class="sec-eyebrow">Record Inquiry</p>
+          <h2 class="sec-title">등록 내역 조회</h2>
+          <p class="sec-sub">동·호수로 신청 내역을 확인하세요</p>
+        </div>
+
+        <div class="field">
+          <label class="field-label">동 · 호수</label>
+          <div class="field-row">
+            <input type="text" id="input-dong" placeholder="동  예) 101">
+            <input type="text" id="input-ho" placeholder="호수  예) 1502">
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="searchRecord()">조회하기</button>
+
+        <div id="search-result" class="result-box"></div>
+
+        <button class="btn-back" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">← 메인으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SUCCESS ══ -->
+  <div id="success_screen" class="form-section">
+    <div class="card">
+      <div class="card-top-accent"></div>
+      <div class="card-body">
+        <div class="success-wrap">
+          <div class="success-diamond">
+            <div class="ornament-line" style="max-width:50px"></div>
+            <div class="diamond-shape"><span class="diamond-inner">✓</span></div>
+            <div class="ornament-line" style="max-width:50px;background:linear-gradient(90deg,var(--gold-border),transparent)"></div>
+          </div>
+          <h2 class="success-title">접수 완료</h2>
+          <p class="success-sub">요청하신 내용이 정상적으로<br>접수되었습니다.</p>
+          <button class="btn-primary" onclick="showForm('dashboard', document.querySelectorAll('.nav-btn')[0])">메인 화면으로 이동</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzevC4LEPVe7v5C0jw9yAVrJWhPIT52pwA4IJDtiekcpp0vA_iXFWXk5ofF42t0EH9_AA/exec";
 
@@ -5,23 +1072,16 @@ document.addEventListener("DOMContentLoaded", () => {
   ['regCanvas','otCanvas','cancelCanvas'].forEach(id => setupCanvas(id));
 });
 
-/* ==========================
-   서명 캔버스
-========================== */
-
 function setupCanvas(id) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
-
   const ctx = canvas.getContext('2d');
-  const label = document.getElementById(id.replace('Canvas','CanvasLabel'));
-
-  let drawing = false;
-  let hasDraw = false;
+  const labelId = id.replace('Canvas','CanvasLabel');
+  const label = document.getElementById(labelId);
+  let drawing = false, hasDraw = false;
 
   const pos = (e, rect) => {
     const src = e.touches ? e.touches[0] : e;
-
     return {
       x: (src.clientX - rect.left) * (canvas.width / rect.width),
       y: (src.clientY - rect.top) * (canvas.height / rect.height)
@@ -30,297 +1090,150 @@ function setupCanvas(id) {
 
   const start = e => {
     drawing = true;
-
-    if (!hasDraw && label) {
-      label.style.opacity = "0";
-      hasDraw = true;
-    }
-
+    if (!hasDraw && label) { label.style.opacity = '0'; hasDraw = true; }
     const p = pos(e, canvas.getBoundingClientRect());
-
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
     e.preventDefault?.();
   };
 
   const move = e => {
     if (!drawing) return;
-
     const p = pos(e, canvas.getBoundingClientRect());
-
     ctx.lineTo(p.x, p.y);
-    ctx.strokeStyle = "#c9a84c";
+    ctx.strokeStyle = '#c9a84c';
     ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.stroke();
-
     e.preventDefault?.();
   };
 
-  const stop = () => drawing = false;
+  const stop = () => { drawing = false; };
 
-  canvas.addEventListener("mousedown", start);
-  canvas.addEventListener("mousemove", move);
-  canvas.addEventListener("mouseup", stop);
-  canvas.addEventListener("mouseleave", stop);
-
-  canvas.addEventListener("touchstart", start, { passive:false });
-  canvas.addEventListener("touchmove", move, { passive:false });
-  canvas.addEventListener("touchend", stop);
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', move, { passive: false });
+  canvas.addEventListener('touchend', stop);
 }
 
 function clearCanvas(id) {
   const canvas = document.getElementById(id);
-  const ctx = canvas.getContext("2d");
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const label = document.getElementById(id.replace('Canvas','CanvasLabel'));
-  if (label) label.style.opacity = "1";
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  const labelId = id.replace('Canvas','CanvasLabel');
+  const label = document.getElementById(labelId);
+  if (label) label.style.opacity = '1';
 }
-
-function isCanvasSigned(id) {
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext("2d");
-
-  const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-  for (let i = 3; i < pixels.length; i += 4) {
-    if (pixels[i] !== 0) return true;
-  }
-
-  return false;
-}
-
-/* ==========================
-   화면 이동
-========================== */
 
 function showForm(id, btn) {
-  document.querySelectorAll('.form-section').forEach(s => {
-    s.classList.remove('active');
-  });
-
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
   if (id !== 'success_screen' && id !== 'inquiry') {
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      b.classList.remove('active');
-    });
-
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
   }
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+  if (id === 'dashboard') resetAll();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-/* ==========================
-   전체 초기화
-========================== */
 
 function resetAll() {
-
-  document.querySelectorAll('input[type="text"], input[type="tel"], textarea')
-    .forEach(el => el.value = '');
-
-  document.querySelectorAll('select')
-    .forEach(el => el.selectedIndex = 0);
-
-  const am = document.getElementById("t-am");
-  if (am) am.checked = true;
-
+  const fields = ['repairDong','repairHo','repairItem','repairDetail',
+    'regName','regDong','regHo','regPhone',
+    'otName','otDong','otHo','otPhone',
+    'cancelName','cancelDong','cancelHo','cancelPhone',
+    'input-dong','input-ho'];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['repairSymptom','cancelReason'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
+  });
   ['regCanvas','otCanvas','cancelCanvas'].forEach(id => clearCanvas(id));
-
-  const box = document.getElementById("search-result");
-  if (box) {
-    box.classList.remove("active");
-    box.innerHTML = "";
-  }
+  const sr = document.getElementById('search-result');
+  if (sr) { sr.classList.remove('active'); sr.innerHTML = ''; }
 }
-
-/* ==========================
-   조회 저장
-========================== */
 
 function saveRecord(dong, ho, title, details) {
-  let arr = JSON.parse(localStorage.getItem("userRecords")) || [];
-
-  arr.push({
-    dong,
-    ho,
-    title,
-    details,
-    date: new Date().toLocaleDateString("ko-KR")
-  });
-
-  localStorage.setItem("userRecords", JSON.stringify(arr));
+  let r = JSON.parse(localStorage.getItem('userRecords')) || [];
+  r.push({ dong, ho, title, details, date: new Date().toLocaleDateString('ko-KR') });
+  localStorage.setItem('userRecords', JSON.stringify(r));
 }
-
-/* ==========================
-   접수 내역 조회
-========================== */
 
 function searchRecord() {
-  const dong = document.getElementById("input-dong").value.trim();
-  const ho   = document.getElementById("input-ho").value.trim();
-
-  const box = document.getElementById("search-result");
+  const dong = document.getElementById('input-dong').value.trim();
+  const ho = document.getElementById('input-ho').value.trim();
+  const box = document.getElementById('search-result');
 
   if (!dong || !ho) {
-    box.classList.add("active");
-    box.innerHTML = "동/호수를 입력하세요.";
+    box.classList.add('active');
+    box.innerHTML = `<div class="result-head">입력 오류</div>
+      <div class="result-detail" style="color:rgba(201,168,76,0.6)">동과 호수를 모두 입력해 주세요.</div>`;
     return;
   }
 
-  const arr = JSON.parse(localStorage.getItem("userRecords")) || [];
+  const records = JSON.parse(localStorage.getItem('userRecords')) || [];
+  const filtered = records.filter(r => r.dong === dong && r.ho === ho);
+  box.classList.add('active');
 
-  const result = arr.filter(v => v.dong === dong && v.ho === ho);
-
-  box.classList.add("active");
-
-  if (result.length === 0) {
-    box.innerHTML = "조회 내역이 없습니다.";
-    return;
+  if (filtered.length) {
+    let html = `<div class="result-head">${dong}동 ${ho}호 &nbsp;·&nbsp; 총 ${filtered.length}건</div>`;
+    filtered.forEach(r => {
+      html += `<div class="result-row">
+        <div class="result-type">${r.title}</div>
+        <div class="result-detail">${r.date} &nbsp;·&nbsp; ${r.details}</div>
+      </div>`;
+    });
+    box.innerHTML = html;
+  } else {
+    box.innerHTML = `<div class="result-head">조회 결과</div>
+      <div class="result-detail">${dong}동 ${ho}호로 접수된 내역이 없습니다.</div>`;
   }
-
-  let html = "";
-
-  result.forEach(v => {
-    html += `
-      <div class="result-row">
-        <div class="result-type">${v.title}</div>
-        <div class="result-detail">${v.date} · ${v.details}</div>
-      </div>
-    `;
-  });
-
-  box.innerHTML = html;
 }
-
-/* ==========================
-   제출
-========================== */
 
 function submitData(type) {
-
-  let dong = '';
-  let ho = '';
-  let title = '';
-  let details = '';
-  let obj = {};
-
-  /* 서명 필수 */
-
-  if (type === '가입신청' && !isCanvasSigned('regCanvas')) {
-    alert('서명을 완료해야 가입 신청이 가능합니다.');
-    return;
-  }
-
-  if (type === 'OT예약' && !isCanvasSigned('otCanvas')) {
-    alert('서명을 완료해야 OT 예약이 가능합니다.');
-    return;
-  }
-
-  if (type === '해지신청' && !isCanvasSigned('cancelCanvas')) {
-    alert('서명을 완료해야 해지 신청이 가능합니다.');
-    return;
-  }
-
-  /* 고장접수 */
+  let dong='', ho='', title='', details='', obj={};
 
   if (type === '고장접수') {
-
-    dong = document.getElementById('repairDong').value.trim();
-    ho   = document.getElementById('repairHo').value.trim();
-
-    const item   = document.getElementById('repairItem').value.trim();
-    const symp   = document.getElementById('repairSymptom').value;
-    const detail = document.getElementById('repairDetail').value.trim();
-
-    title = '고장접수 신고';
-    details = item + ' / ' + symp;
-
-    obj = { dong, ho, item, symptom:symp, detail };
-  }
-
-  /* 가입신청 */
-
-  else if (type === '가입신청') {
-
-    const name  = document.getElementById('regName').value.trim();
-    dong        = document.getElementById('regDong').value.trim();
-    ho          = document.getElementById('regHo').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
-
-    title = '회원가입신청';
-    details = '이름: ' + name;
-
-    obj = { name, dong, ho, phone };
-  }
-
-  /* OT예약 */
-
-  else if (type === 'OT예약') {
-
-    const name  = document.getElementById('otName').value.trim();
-    dong        = document.getElementById('otDong').value.trim();
-    ho          = document.getElementById('otHo').value.trim();
-    const phone = document.getElementById('otPhone').value.trim();
-
+    dong = document.getElementById('repairDong').value;
+    ho   = document.getElementById('repairHo').value;
+    const item = document.getElementById('repairItem').value;
+    const symp = document.getElementById('repairSymptom').value;
+    title = '고장접수 신고'; details = `${item} / ${symp}`;
+    obj = { item, symptom: symp, detail: document.getElementById('repairDetail').value };
+  } else if (type === '가입신청') {
+    dong = document.getElementById('regDong').value;
+    ho   = document.getElementById('regHo').value;
+    const name = document.getElementById('regName').value;
+    title = '회원가입신청'; details = `이름: ${name}`;
+    obj = { name, phone: document.getElementById('regPhone').value };
+  } else if (type === 'OT예약') {
+    dong = document.getElementById('otDong').value;
+    ho   = document.getElementById('otHo').value;
+    const name = document.getElementById('otName').value;
     const time = document.querySelector('input[name="otTime"]:checked').value;
-
-    title = 'OT신청';
-    details = '이름: ' + name + ' / 시간대: ' + time;
-
-    obj = { name, dong, ho, phone, time };
-  }
-
-  /* 해지신청 */
-
-  else if (type === '해지신청') {
-
-    const name   = document.getElementById('cancelName').value.trim();
-    dong         = document.getElementById('cancelDong').value.trim();
-    ho           = document.getElementById('cancelHo').value.trim();
-    const phone  = document.getElementById('cancelPhone').value.trim();
-
+    title = 'OT신청'; details = `이름: ${name} / 시간대: ${time}`;
+    obj = { name, time };
+  } else if (type === '해지신청') {
+    dong = document.getElementById('cancelDong').value;
+    ho   = document.getElementById('cancelHo').value;
+    const name   = document.getElementById('cancelName').value;
     const reason = document.getElementById('cancelReason').value;
-
-    title = '회원해지신청';
-    details = '이름: ' + name + ' / 사유: ' + reason;
-
-    obj = { name, dong, ho, phone, reason };
+    title = '회원해지신청'; details = `이름: ${name} / 사유: ${reason}`;
+    obj = { name, reason };
   }
 
-  if (dong && ho) {
-    saveRecord(dong, ho, title, details);
-  }
+  if (dong && ho) saveRecord(dong, ho, title, details);
 
   const fd = new FormData();
-  fd.append("sheetName", type);
-  fd.append("data", JSON.stringify(obj));
+  fd.append('sheetName', type);
+  fd.append('data', JSON.stringify(obj));
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: fd
-  })
-  .then(() => {
-
-    /* 성공 후 즉시 초기화 */
-    resetAll();
-
-    /* 완료 화면 */
-    showForm("success_screen");
-
-  })
-  .catch(() => {
-    alert("전송 중 오류가 발생했습니다.");
-  });
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body:fd })
+    .then(() => { resetAll(); showForm('success_screen'); })
+    .catch(() => { resetAll(); showForm('success_screen'); });
 }
 </script>
+</body>
+</html>
