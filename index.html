@@ -60,6 +60,24 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
+        /* 라디오 버튼 스타일 추가 */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .radio-group input {
+            width: auto;
+            margin-top: 0;
+            margin-right: 8px;
+        }
+        
         canvas {
             border: 2px solid #007bff;
             border-radius: 8px;
@@ -134,6 +152,12 @@
                 <label>연락처</label>
                 <input type="tel" placeholder="010-0000-0000">
                 
+                <label>OT 예약 (오전/오후 선택)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="regOT" value="오전" checked> 오전</label>
+                    <label><input type="radio" name="regOT" value="오후"> 오후</label>
+                </div>
+                
                 <label>본인 확인 서명 (사인)</label>
                 <canvas id="regCanvas" height="100"></canvas>
                 <button type="button" class="btn-clear" onclick="clearCanvas('regCanvas')">지우기</button>
@@ -162,7 +186,6 @@
     </div>
 
     <script>
-        // 발급받은 URL을 아래 따옴표 안에 그대로 붙여넣습니다.
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUogONfMVgMXOkPwdGoOMSZ0aIZoFwsVBbOiuodLL5UecAWgOKN1CyIgXB2TiLo-AX1g/exec";
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -237,10 +260,15 @@
                 };
             } else if (type === '가입신청') {
                 sheetName = "가입신청";
+                
+                // 선택된 라디오 버튼 값 가져오기
+                const otValue = document.querySelector('input[name="regOT"]:checked').value;
+
                 data = {
                     regName: document.querySelectorAll('#register input')[0].value,
                     regApt: document.querySelectorAll('#register input')[1].value,
                     regPhone: document.querySelectorAll('#register input')[2].value,
+                    regOT: otValue, // OT 예약 값 추가
                     regSign: "서명 완료"
                 };
             } else if (type === '해지신청') {
@@ -256,7 +284,6 @@
             formData.append('sheetName', sheetName);
             formData.append('data', JSON.stringify(data));
 
-            // 모바일 통신을 위한 설정
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -267,7 +294,6 @@
                 location.reload();
             })
             .catch(err => {
-                // 통신 성공 여부와 상관없이 작동
                 alert('전송되었습니다.');
                 location.reload();
             });
