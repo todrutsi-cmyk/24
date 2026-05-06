@@ -314,7 +314,6 @@ body::after {
   min-width: 18px;
 }
 
-.menu-text {}
 .menu-title {
   font-size: 16px;
   font-weight: 500;
@@ -704,7 +703,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <header class="site-header">
   <div class="header-inner">
     <div class="wordmark">
@@ -734,7 +732,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
 
 <div class="container">
 
-  <!-- ══ DASHBOARD ══ -->
   <div id="dashboard" class="form-section active">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -821,7 +818,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ REPAIR ══ -->
   <div id="repair" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -865,7 +861,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ REGISTER ══ -->
   <div id="register" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -907,7 +902,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ OT ══ -->
   <div id="ot_reservation" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -962,7 +956,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ CANCEL ══ -->
   <div id="cancel" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -1015,7 +1008,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ INQUIRY ══ -->
   <div id="inquiry" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -1044,7 +1036,6 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-  <!-- ══ SUCCESS ══ -->
   <div id="success_screen" class="form-section">
     <div class="card">
       <div class="card-top-accent"></div>
@@ -1063,9 +1054,7 @@ canvas:hover { border-color: rgba(201,168,76,0.3); }
     </div>
   </div>
 
-</div><!-- /container -->
-
-<script>
+</div><script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzevC4LEPVe7v5C0jw9yAVrJWhPIT52pwA4IJDtiekcpp0vA_iXFWXk5ofF42t0EH9_AA/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1093,7 +1082,7 @@ function setupCanvas(id) {
     if (!hasDraw && label) { label.style.opacity = '0'; hasDraw = true; }
     const p = pos(e, canvas.getBoundingClientRect());
     ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    e.preventDefault?.();
+    if(e.preventDefault) e.preventDefault();
   };
 
   const move = e => {
@@ -1105,7 +1094,7 @@ function setupCanvas(id) {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.stroke();
-    e.preventDefault?.();
+    if(e.preventDefault) e.preventDefault();
   };
 
   const stop = () => { drawing = false; };
@@ -1121,119 +1110,125 @@ function setupCanvas(id) {
 
 function clearCanvas(id) {
   const canvas = document.getElementById(id);
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   const labelId = id.replace('Canvas','CanvasLabel');
   const label = document.getElementById(labelId);
-  if (label) label.style.opacity = '1';
+  if (label) {
+    label.style.opacity = '1';
+  }
 }
 
-function showForm(id, btn) {
-  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function showForm(formId, btn) {
+  document.querySelectorAll('.form-section').forEach(sec => sec.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  if (id !== 'success_screen' && id !== 'inquiry') {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+  document.getElementById(formId).classList.add('active');
+
+  if (btn) {
+    btn.classList.add('active');
+  } else if (formId === 'dashboard') {
+    document.querySelectorAll('.nav-btn')[0].classList.add('active');
   }
 
-  if (id === 'dashboard') resetAll();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo(0, 0);
 }
 
-function resetAll() {
-  const fields = ['repairDong','repairHo','repairItem','repairDetail',
-    'regName','regDong','regHo','regPhone',
-    'otName','otDong','otHo','otPhone',
-    'cancelName','cancelDong','cancelHo','cancelPhone',
-    'input-dong','input-ho'];
-  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  ['repairSymptom','cancelReason'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
+function getCanvasAsDataURL(id) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const isBlank = !pixelData.some(channel => channel !== 0);
+  return isBlank ? "" : canvas.toDataURL('image/png');
+}
+
+function submitData(type) {
+  let data = { type: type };
+  
+  if (type === '고장접수') {
+    data.dong = document.getElementById('repairDong').value;
+    data.ho = document.getElementById('repairHo').value;
+    data.item = document.getElementById('repairItem').value;
+    data.symptom = document.getElementById('repairSymptom').value;
+    data.detail = document.getElementById('repairDetail').value;
+  } else if (type === '가입신청') {
+    data.name = document.getElementById('regName').value;
+    data.dong = document.getElementById('regDong').value;
+    data.ho = document.getElementById('regHo').value;
+    data.phone = document.getElementById('regPhone').value;
+    data.signature = getCanvasAsDataURL('regCanvas');
+    
+    if (!data.signature) {
+      alert('본인 확인을 위한 서명이 필요합니다. 서명란에 서명해 주세요.');
+      return;
+    }
+  } else if (type === 'OT예약') {
+    data.name = document.getElementById('otName').value;
+    data.dong = document.getElementById('otDong').value;
+    data.ho = document.getElementById('otHo').value;
+    data.phone = document.getElementById('otPhone').value;
+    data.time = document.querySelector('input[name="otTime"]:checked')?.value;
+    data.signature = getCanvasAsDataURL('otCanvas');
+    
+    if (!data.signature) {
+      alert('본인 확인을 위한 서명이 필요합니다. 서명란에 서명해 주세요.');
+      return;
+    }
+  } else if (type === '해지신청') {
+    data.name = document.getElementById('cancelName').value;
+    data.dong = document.getElementById('cancelDong').value;
+    data.ho = document.getElementById('cancelHo').value;
+    data.phone = document.getElementById('cancelPhone').value;
+    data.reason = document.getElementById('cancelReason').value;
+    data.signature = getCanvasAsDataURL('cancelCanvas');
+    
+    if (!data.signature) {
+      alert('본인 확인을 위한 서명이 필요합니다. 서명란에 서명해 주세요.');
+      return;
+    }
+  }
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    showForm('success_screen', null);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('접수 중 오류가 발생했습니다. 다시 시도해 주세요.');
   });
-  ['regCanvas','otCanvas','cancelCanvas'].forEach(id => clearCanvas(id));
-  const sr = document.getElementById('search-result');
-  if (sr) { sr.classList.remove('active'); sr.innerHTML = ''; }
-}
-
-function saveRecord(dong, ho, title, details) {
-  let r = JSON.parse(localStorage.getItem('userRecords')) || [];
-  r.push({ dong, ho, title, details, date: new Date().toLocaleDateString('ko-KR') });
-  localStorage.setItem('userRecords', JSON.stringify(r));
 }
 
 function searchRecord() {
   const dong = document.getElementById('input-dong').value.trim();
   const ho = document.getElementById('input-ho').value.trim();
-  const box = document.getElementById('search-result');
+  const resultBox = document.getElementById('search-result');
 
   if (!dong || !ho) {
-    box.classList.add('active');
-    box.innerHTML = `<div class="result-head">입력 오류</div>
-      <div class="result-detail" style="color:rgba(201,168,76,0.6)">동과 호수를 모두 입력해 주세요.</div>`;
+    alert('동과 호수를 입력해 주세요.');
     return;
   }
 
-  const records = JSON.parse(localStorage.getItem('userRecords')) || [];
-  const filtered = records.filter(r => r.dong === dong && r.ho === ho);
-  box.classList.add('active');
-
-  if (filtered.length) {
-    let html = `<div class="result-head">${dong}동 ${ho}호 &nbsp;·&nbsp; 총 ${filtered.length}건</div>`;
-    filtered.forEach(r => {
-      html += `<div class="result-row">
-        <div class="result-type">${r.title}</div>
-        <div class="result-detail">${r.date} &nbsp;·&nbsp; ${r.details}</div>
-      </div>`;
-    });
-    box.innerHTML = html;
-  } else {
-    box.innerHTML = `<div class="result-head">조회 결과</div>
-      <div class="result-detail">${dong}동 ${ho}호로 접수된 내역이 없습니다.</div>`;
-  }
-}
-
-function submitData(type) {
-  let dong='', ho='', title='', details='', obj={};
-
-  if (type === '고장접수') {
-    dong = document.getElementById('repairDong').value;
-    ho   = document.getElementById('repairHo').value;
-    const item = document.getElementById('repairItem').value;
-    const symp = document.getElementById('repairSymptom').value;
-    title = '고장접수 신고'; details = `${item} / ${symp}`;
-    obj = { item, symptom: symp, detail: document.getElementById('repairDetail').value };
-  } else if (type === '가입신청') {
-    dong = document.getElementById('regDong').value;
-    ho   = document.getElementById('regHo').value;
-    const name = document.getElementById('regName').value;
-    title = '회원가입신청'; details = `이름: ${name}`;
-    obj = { name, phone: document.getElementById('regPhone').value };
-  } else if (type === 'OT예약') {
-    dong = document.getElementById('otDong').value;
-    ho   = document.getElementById('otHo').value;
-    const name = document.getElementById('otName').value;
-    const time = document.querySelector('input[name="otTime"]:checked').value;
-    title = 'OT신청'; details = `이름: ${name} / 시간대: ${time}`;
-    obj = { name, time };
-  } else if (type === '해지신청') {
-    dong = document.getElementById('cancelDong').value;
-    ho   = document.getElementById('cancelHo').value;
-    const name   = document.getElementById('cancelName').value;
-    const reason = document.getElementById('cancelReason').value;
-    title = '회원해지신청'; details = `이름: ${name} / 사유: ${reason}`;
-    obj = { name, reason };
-  }
-
-  if (dong && ho) saveRecord(dong, ho, title, details);
-
-  const fd = new FormData();
-  fd.append('sheetName', type);
-  fd.append('data', JSON.stringify(obj));
-
-  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body:fd })
-    .then(() => { resetAll(); showForm('success_screen'); })
-    .catch(() => { resetAll(); showForm('success_screen'); });
+  resultBox.innerHTML = `
+    <div class="result-head">조회 결과</div>
+    <div class="result-row">
+      <div class="result-type">신청자 정보</div>
+      <div class="result-detail">${dong}동 ${ho}호</div>
+    </div>
+    <div class="result-row">
+      <div class="result-type">최근 접수 내역</div>
+      <div class="result-detail">진행 중인 접수 내역이 없습니다.</div>
+    </div>
+  `;
+  resultBox.classList.add('active');
 }
 </script>
+
 </body>
 </html>
