@@ -35,7 +35,6 @@
             color: white; 
             transition: 0.3s; 
             font-size: 13px;
-            /* 두 줄 배치를 위해 너비 고정 및 텍스트 정렬 */
             width: 75px;
             height: 45px;
             display: flex;
@@ -69,7 +68,6 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         
-        /* 라디오 버튼 스타일 */
         .radio-group {
             display: flex;
             gap: 20px;
@@ -124,7 +122,6 @@
         }
         .footer { text-align: center; margin-top: 20px; font-size: 13px; color: #888; }
         
-        /* 알림 완료 화면 */
         .success-screen {
             text-align: center;
             padding: 40px 20px;
@@ -279,7 +276,6 @@
             canvas.addEventListener("mouseup", () => { isDrawing = false; });
             canvas.addEventListener("mouseleave", () => { isDrawing = false; });
 
-            // 모바일 터치 이벤트
             canvas.addEventListener("touchstart", (e) => {
                 isDrawing = true;
                 const touch = e.touches[0];
@@ -364,11 +360,9 @@
                 body: formData
             })
             .then(res => {
-                // 성공적으로 접수되면 완료 화면으로 이동
                 showForm('success_screen');
             })
             .catch(err => {
-                // 오프라인 모드 등 예외 발생 시에도 완료 화면으로 이동하여 진행
                 showForm('success_screen');
             });
         }
